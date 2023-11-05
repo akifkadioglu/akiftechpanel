@@ -49,7 +49,11 @@ import { useFirestore } from "vuefire";
 import { collection, addDoc, doc, serverTimestamp } from "firebase/firestore";
 import { ref } from "vue";
 const editor = ClassicEditor;
-const editorConfig = {};
+const editorConfig = {
+  mediaEmbed: {
+       previewsInData: true
+   },
+};
 
 const title = ref("");
 const subtitle = ref("");
