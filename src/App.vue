@@ -1,10 +1,14 @@
 <template>
   <div class="space-y-5 mt-5 container mx-auto">
+    <div class="flex justify-center space-x-2">
+      <span>About Tech:</span>
+      <input type="checkbox" v-model="aboutTech" />
+    </div>
     <div class="flex justify-center">
       <input
         type="text"
         class="bg-gray-50 w-96 border focus:outline-none focus:border-gray-500 border-gray-300 text-gray-900 text-sm rounded-0 p-2.5"
-        placeholder="Reference ID"
+        placeholder="Reply ID"
         v-model="replyID"
       />
     </div>
@@ -51,14 +55,15 @@ import { ref } from "vue";
 const editor = ClassicEditor;
 const editorConfig = {
   mediaEmbed: {
-       previewsInData: true
-   },
+    previewsInData: true,
+  },
 };
 
 const title = ref("");
 const subtitle = ref("");
 const replyID = ref("");
 const post = ref("");
+const aboutTech = ref(false);
 const isLoading = ref(false);
 
 const db = useFirestore();
@@ -75,6 +80,7 @@ async function createData() {
     subtitle: subtitle.value,
     reply: documentRef,
     post: post.value,
+    is_about_tech: aboutTech.value,
     created_at: serverTimestamp(),
   })
     .then(() => {
