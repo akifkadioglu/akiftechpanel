@@ -1,8 +1,16 @@
 <template>
-  <div class="space-y-5 mt-5 container mx-auto">
-    <div class="flex justify-center space-x-2">
-      <span>About Tech:</span>
-      <input type="checkbox" v-model="aboutTech" />
+  <div class="space-y-5 mt-5 mx-auto">
+    <div class="flex justify-center">
+      <select
+        v-model="groupID"
+        id="countries"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:outline-none focus:border-gray-500 block w-96 p-2.5"
+      >
+        <option value="" selected>Not Selected</option>
+        <option :value="item.id" v-for="(item, index) in groups" :key="index">
+          {{ item.title }}
+        </option>
+      </select>
     </div>
     <div class="flex justify-center">
       <input
@@ -49,7 +57,7 @@
 
 <script setup>
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { useFirestore } from "vuefire";
+import { useFirestore, useCollection } from "vuefire";
 import { collection, addDoc, doc, serverTimestamp } from "firebase/firestore";
 import { ref } from "vue";
 const editor = ClassicEditor;
@@ -58,31 +66,34 @@ const editorConfig = {
     previewsInData: true,
   },
 };
-
 const title = ref("");
 const subtitle = ref("");
 const replyID = ref("");
 const post = ref("");
-const aboutTech = ref(false);
+const groupID = ref("");
 const isLoading = ref(false);
-
 const db = useFirestore();
+const groups = useCollection(collection(db, "groups"));
+const body = new Map();
 
 async function createData() {
   isLoading.value = true;
-  var documentRef = "";
+
+  body.set("title", title.value);
+  body.set("subtitle", subtitle.value);
+  body.set("post", post.value);
+  body.set("created_at", serverTimestamp());
+
   if (replyID.value != "") {
-    var documentRef = doc(db, "posts", replyID.value);
+    body.set("reply", doc(db, "posts", replyID.value));
+  }
+  if (groupID.value != "") {
+    body.set("group", doc(db, "groups", groupID.value));
+  } else {
+    body.delete("group");
   }
 
-  await addDoc(collection(db, "posts"), {
-    title: title.value,
-    subtitle: subtitle.value,
-    reply: documentRef,
-    post: post.value,
-    is_about_tech: aboutTech.value,
-    created_at: serverTimestamp(),
-  })
+  await addDoc(collection(db, "posts"), Object.fromEntries(body))
     .then(() => {
       title.value = "";
       subtitle.value = "";
@@ -93,5 +104,3 @@ async function createData() {
   isLoading.value = false;
 }
 </script>
-
-<style scoped></style>
